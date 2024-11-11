@@ -1,0 +1,20 @@
+﻿@{ViewData["Title"] = "Task 1";}
+
+    <h1 class="display-4">Task 1</h1>
+    <h2>Задание:</h2>
+    <p>
+    Получить информацию о поставщиках, которые осуществляли
+    поставки деталей из заданного города в указанный период.
+    </p>
+    
+    <form method="post">
+        <label>Город:</label>
+        @ViewData["TownPost"]
+        <br />
+        <label>От:</label>
+        @ViewData["time_start"] <br />
+        <label>До:</label>
+        @ViewData["time_end"] <br />
+        <button type="submit">Подтвердить</button>
+    </form>
+
