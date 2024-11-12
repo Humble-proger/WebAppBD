@@ -1,6 +1,6 @@
 ﻿@{ViewData["Title"] = "Task 1";}
 
-    <h1 class="display-4">Task 1</h1>
+    <h1>Task 1</h1>
     <h2>Задание:</h2>
     <p>
     Получить информацию о поставщиках, которые осуществляли
@@ -8,12 +8,12 @@
     </p>
     
     <form method="post">
-        <label>Город:</label>
+    <label class="text-field__label">Укажите город:</label>
         @ViewData["TownPost"]
         <br />
-        <label>От:</label>
+    <label class="text-field__label">В периоде от:</label>
         @ViewData["time_start"] <br />
-        <label>До:</label>
+    <label class="text-field__label">В периоде до:</label>
         @ViewData["time_end"] <br />
         <button type="submit">Подтвердить</button>
     </form>
