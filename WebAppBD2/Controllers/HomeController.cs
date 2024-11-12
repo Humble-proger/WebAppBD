@@ -127,16 +127,24 @@ namespace WebAppBD2.Controllers
         public RedirectToActionResult Index(string town_task_1, DateTime time_start, DateTime time_end) {
             _logger.LogInformation("Start processing POST-request for page: {}", "Task 1");
             _logger.LogInformation("Getting the results of task 1...");
-            Dictionary<string, List<string?>>? result = this.ServerBD.ExecuteReaderCommand($"SELECT DISTINCT s.* FROM spj1 JOIN s ON spj1.n_post = s.n_post WHERE date_post >= to_date('{time_start:dd-MM-yyyy}','dd-mm-yyyy') and date_post <= to_date('{time_end:dd-MM-yyyy}','dd-mm-yyyy') and spj1.n_det IN(SELECT DISTINCT p.n_det FROM p WHERE p.town = '{town_task_1.Trim()}')");
-            if (result == null)
+            if (time_end >= time_start)
             {
-                _logger.LogWarning("No results found. Generating page with results.");
+                Dictionary<string, List<string?>>? result = this.ServerBD.ExecuteReaderCommand($"SELECT DISTINCT s.* FROM spj1 JOIN s ON spj1.n_post = s.n_post WHERE date_post >= to_date('{time_start:dd-MM-yyyy}','dd-mm-yyyy') and date_post <= to_date('{time_end:dd-MM-yyyy}','dd-mm-yyyy') and spj1.n_det IN(SELECT DISTINCT p.n_det FROM p WHERE p.town = '{town_task_1.Trim()}')");
+                if (result == null)
+                {
+                    _logger.LogWarning("No results found. Generating page with results.");
+                    _logger.LogInformation("POST-request processing for the page {} completed", "Task 1");
+                    return RedirectToAction("ResultTask", "Home", new { data = "<p>Результаты не найденыю.</p>" });
+                }
+                _logger.LogInformation("Generating page with results.");
                 _logger.LogInformation("POST-request processing for the page {} completed", "Task 1");
-                return RedirectToAction("ResultTask", "Home", new { data = "<p>Результаты не найденыю.</p>" });
+                return RedirectToAction("ResultTask", "Home", new { data = ConvertToHtmlTable(result) });
             }
-            _logger.LogInformation("Generating page with results.");
-            _logger.LogInformation("POST-request processing for the page {} completed", "Task 1");
-            return RedirectToAction("ResultTask", "Home", new { data = ConvertToHtmlTable(result) });
+            else {
+                _logger.LogError("time_end < time_start. Incorrect data entry.");
+                _logger.LogInformation("POST-request processing for the page {} completed", "Task 1");
+                return RedirectToAction("ResultTask", "Home", new { data = "<p>Данные введены некорректно.</p>" });
+            }
         }
 
         [HttpPost]
