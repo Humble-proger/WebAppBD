@@ -6,7 +6,7 @@ using System.Text;
 
 namespace WebAppBD2.Controllers
 {
-    public class HomeController : Controller, IDisposable
+    public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
         private readonly Database_Queries ServerBD;
@@ -14,8 +14,6 @@ namespace WebAppBD2.Controllers
         {
             _logger = logger;
             ServerBD = new Database_Queries(_logger);
-            _logger.LogInformation("Connecting to Server: students.ami.nstu.ru");
-            ServerBD.ConnectToBD();
         }
 
         private string? GetOptionString()
@@ -76,6 +74,8 @@ namespace WebAppBD2.Controllers
         }
         public IActionResult Index()
         {
+            _logger.LogInformation("Connecting to Server: students.ami.nstu.ru");
+            ServerBD.ConnectToBD();
             _logger.LogInformation("Start processing GET-request for page: {}", "Task 1");
             _logger.LogInformation("Formation of Option List");
             string? result = GetOptionString();
@@ -121,6 +121,8 @@ namespace WebAppBD2.Controllers
             ViewBag.time_end = new HtmlString(result);
             _logger.LogInformation("The second date input field has been generated successfully.");
             _logger.LogInformation("Get request processing for the page {} completed", "Task 1");
+            _logger.LogInformation("The connection is closing...");
+            ServerBD.CloseConnectToBD();
             return View();
         }
         [HttpPost]
@@ -129,7 +131,11 @@ namespace WebAppBD2.Controllers
             _logger.LogInformation("Getting the results of task 1...");
             if (time_end >= time_start)
             {
+                _logger.LogInformation("Connecting to Server: students.ami.nstu.ru");
+                ServerBD.ConnectToBD();
                 Dictionary<string, List<string?>>? result = this.ServerBD.ExecuteReaderCommand($"SELECT DISTINCT s.* FROM spj1 JOIN s ON spj1.n_post = s.n_post WHERE date_post >= to_date('{time_start:dd-MM-yyyy}','dd-mm-yyyy') and date_post <= to_date('{time_end:dd-MM-yyyy}','dd-mm-yyyy') and spj1.n_det IN(SELECT DISTINCT p.n_det FROM p WHERE p.town = '{town_task_1.Trim()}')");
+                _logger.LogInformation("The connection is closing...");
+                ServerBD.CloseConnectToBD();
                 if (result == null)
                 {
                     _logger.LogWarning("No results found. Generating page with results.");
@@ -149,6 +155,8 @@ namespace WebAppBD2.Controllers
 
         [HttpPost]
         public RedirectToActionResult Privacy(string name_post, int reiting, string town) {
+            _logger.LogInformation("Connecting to Server: students.ami.nstu.ru");
+            ServerBD.ConnectToBD();
             _logger.LogInformation("Start processing POST-request for page: {}", "Task 2");
             _logger.LogInformation("Getting the maximum supplier number...");
             object? data = ServerBD.ExecuteScalarCommand("SELECT MAX(n_post) FROM s");
@@ -160,6 +168,8 @@ namespace WebAppBD2.Controllers
             string n_post = "S" + (max_val + 1);
             _logger.LogInformation("Getting the results of task 2...");
             int num = this.ServerBD.ExecuteNonQueryCommand($"INSERT INTO s VALUES ('{n_post}','{name_post}',{reiting},'{town}');");
+            _logger.LogInformation("The connection is closing...");
+            ServerBD.CloseConnectToBD();
             if (num > 0)
             {
                 _logger.LogInformation("The entry was added successfully.");
@@ -183,11 +193,8 @@ namespace WebAppBD2.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
-        public void Dispose() {
-            ServerBD.CloseConnectToBD();
-        }
         ~HomeController() {
-            Dispose();
+            ServerBD.CloseConnectToBD();
         }
     }
 }
