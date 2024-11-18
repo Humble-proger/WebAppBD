@@ -158,16 +158,8 @@ namespace WebAppBD2.Controllers
             _logger.LogInformation("Connecting to Server: students.ami.nstu.ru");
             ServerBD.ConnectToBD();
             _logger.LogInformation("Start processing POST-request for page: {}", "Task 2");
-            _logger.LogInformation("Getting the maximum supplier number...");
-            object? data = ServerBD.ExecuteScalarCommand("SELECT MAX(n_post) FROM s");
-            int max_val = 0;
-            if (data != null)
-                max_val = int.Parse(data.ToString()[1..]);
-            else
-                _logger.LogInformation("The table with suppliers is empty");
-            string n_post = "S" + (max_val + 1);
             _logger.LogInformation("Getting the results of task 2...");
-            int num = this.ServerBD.ExecuteNonQueryCommand($"INSERT INTO s VALUES ('{n_post}','{name_post}',{reiting},'{town}');");
+            int num = this.ServerBD.ExecuteNonQueryCommand($"INSERT INTO s VALUES (null,'{name_post}',{reiting},'{town}');");
             _logger.LogInformation("The connection is closing...");
             ServerBD.CloseConnectToBD();
             if (num > 0)
